@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'io.freefair.lombok' version '8.6'
 }
 
 group = 'by.lobacevich'
@@ -14,7 +15,17 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+ext {
+    springBootVersion = '3.5.10'
+}
+
 dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+
+    implementation 'org.postgresql:postgresql:42.7.8'
+
+    implementation 'org.liquibase:liquibase-core:5.0.1'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
