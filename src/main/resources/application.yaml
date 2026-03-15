@@ -9,8 +9,8 @@ spring:
     password: ${DB_PASSWORD}
 
   liquibase:
-    enabled: true
-    drop-first: false
+    enabled: false
+    drop-first: true
     change-log: classpath:db/changelog/changelog-master.yaml
 
   jpa:
@@ -21,5 +21,9 @@ spring:
       format_sql: true
 
   logging:
+    file.name: logs/log.log
     level:
-      liquibase: DEBUG
+      org.hibernate:
+        SQL: debug
+        type.descriptor.sql.BasicBinder: trace
+      org.springframework: warn
