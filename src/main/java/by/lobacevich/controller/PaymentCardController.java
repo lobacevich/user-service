@@ -5,10 +5,12 @@ import by.lobacevich.dto.response.PayCardDtoResponse;
 import by.lobacevich.service.PaymentCardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,19 +30,19 @@ public class PaymentCardController {
     private final PaymentCardService service;
 
     @GetMapping("/{id}")
-    public ResponseEntity<PayCardDtoResponse> findById(@PathVariable("id") Long id) {
+    public ResponseEntity<PayCardDtoResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<PayCardDtoResponse>> findAll(
-            @RequestParam(value = "page_size", defaultValue = "20", required = false) int pageSize,
-            @RequestParam(value = "page_number", defaultValue = "0", required = false) int pageNumber) {
-        return ResponseEntity.ok(service.findCards(pageNumber, pageSize));
+    public ResponseEntity<Page<PayCardDtoResponse>> findAll(
+            @RequestParam(value = "size", defaultValue = "20", required = false) int size,
+            @RequestParam(value = "number", defaultValue = "0", required = false) int number) {
+        return ResponseEntity.ok(service.findCards(number, size));
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<PayCardDtoResponse>> findByUserId(@PathVariable("id") Long id) {
+    public ResponseEntity<List<PayCardDtoResponse>> findByUserId(@PathVariable Long id) {
         return ResponseEntity.ok(service.findCardsByUserId(id));
     }
 
@@ -50,26 +52,20 @@ public class PaymentCardController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/{id}/activate")
-    public void activate(@PathVariable("id") Long id) {
+    @PatchMapping("/{id}/activate")
+    public void activate(@PathVariable Long id) {
         service.activate(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/{id}/deactivate")
-    public void deactivate(@PathVariable("id") Long id) {
+    @PatchMapping("/{id}/deactivate")
+    public void delete(@PathVariable Long id) {
         service.deactivate(id);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PayCardDtoResponse> update(@Valid @RequestBody PayCardDtoRequest dtoRequest,
-                                                     @PathVariable("id") Long id) {
+                                                     @PathVariable Long id) {
         return ResponseEntity.ok(service.update(dtoRequest, id));
-    }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Long id) {
-        service.delete(id);
     }
 }

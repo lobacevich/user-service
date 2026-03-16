@@ -12,13 +12,17 @@ import by.lobacevich.repository.PaymentCardRepository;
 import by.lobacevich.repository.UserRepository;
 import by.lobacevich.service.PaymentCardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,33 +32,38 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     private final PaymentCardRepository repository;
     private final PaymentCardMapper mapper;
     private final UserRepository userRepository;
+    private final CacheManager cacheManager;
 
+    @CacheEvict(value = "users", key = "#dto.userId")
     @Transactional
     @Override
     public PayCardDtoResponse create(PayCardDtoRequest dto) {
         Long userId = dto.userId();
-        User user = findUserById(userId);
-        if (repository.countByUserId(userId) > 4) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new EntityNotFoundException("User not found with id " + userId));
+        if (repository.countByUserId(userId) >= 5) {
             throw new CardsLimitException("User with id" + userId + " can not have more then 5 cards");
         }
         PaymentCard card = mapper.dtoToEntity(dto);
         card.setUser(user);
         try {
-            repository.save(card);
-            return mapper.entityToDto(findCardById(card.getId()));
+            return mapper.entityToDto(repository.save(card));
         } catch (DataIntegrityViolationException e) {
             throw new InvalidDataException("Duplicate card number");
         }
     }
 
+    @CacheEvict(value = "users", key = "#dto.userId")
     @Transactional
     @Override
     public PayCardDtoResponse update(PayCardDtoRequest dto, Long id) {
-        PaymentCard oldCard = findCardById(id);
+        PaymentCard oldCard = repository.findByIdWithUser(id).orElseThrow(() ->
+                new EntityNotFoundException("Card not found with id " + id));
         PaymentCard newCard = mapper.dtoToEntity(dto);
-        newCard.setUser(findUserById(id));
-        newCard.setActive(oldCard.getActive());
+        newCard.setId(oldCard.getId());
+        newCard.setUser(oldCard.getUser());
         newCard.setCreatedAt(oldCard.getCreatedAt());
+        newCard.setActive(true);
         try {
             return mapper.entityToDto(repository.save(newCard));
         } catch (DataIntegrityViolationException e) {
@@ -62,24 +71,17 @@ public class PaymentCardServiceImpl implements PaymentCardService {
         }
     }
 
-    @Transactional
-    @Override
-    public void delete(Long id) {
-        repository.delete(findCardById(id));
-    }
-
     @Override
     public PayCardDtoResponse findById(Long id) {
-        return mapper.entityToDto(findCardById(id));
+        return mapper.entityToDto(repository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("Card not found with id " + id)));
     }
 
     @Override
-    public List<PayCardDtoResponse> findCards(int pageNumber,
-                                              int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return repository.findAll(pageable).stream()
-                .map(mapper::entityToDto)
-                .collect(Collectors.toList());
+    public Page<PayCardDtoResponse> findCards(int number,
+                                              int size) {
+        Pageable pageable = PageRequest.of(number, size);
+        return repository.findAll(pageable).map(mapper::entityToDto);
     }
 
     @Override
@@ -92,26 +94,18 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     @Transactional
     @Override
     public void activate(Long id) {
-        if (repository.activateCard(id) == 0) {
-            throw new EntityNotFoundException("Card not found with id " + id);
-        }
+        PaymentCard card = repository.findByIdWithUser(id).orElseThrow(() ->
+                new EntityNotFoundException("Card not found with id " + id));
+        Objects.requireNonNull(cacheManager.getCache("users")).evict(card.getUser().getId());
+        repository.activateCard(id);
     }
 
     @Transactional
     @Override
     public void deactivate(Long id) {
-        if (repository.deactivateCard(id) == 0) {
-            throw new EntityNotFoundException("Card not found with id " + id);
-        }
-    }
-
-    private PaymentCard findCardById(Long id) {
-        return repository.findById(id).orElseThrow(() ->
+        PaymentCard card = repository.findByIdWithUser(id).orElseThrow(() ->
                 new EntityNotFoundException("Card not found with id " + id));
-    }
-
-    private User findUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("User not found with id " + id));
+        Objects.requireNonNull(cacheManager.getCache("users")).evict(card.getUser().getId());
+        repository.deactivateCard(id);
     }
 }

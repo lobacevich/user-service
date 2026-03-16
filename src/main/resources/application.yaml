@@ -9,7 +9,7 @@ spring:
     password: ${DB_PASSWORD}
 
   liquibase:
-    enabled: false
+    enabled: true
     drop-first: true
     change-log: classpath:db/changelog/changelog-master.yaml
 
@@ -20,10 +20,32 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
       format_sql: true
 
-  logging:
-    file.name: logs/log.log
-    level:
-      org.hibernate:
-        SQL: debug
-        type.descriptor.sql.BasicBinder: trace
-      org.springframework: warn
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 60000
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
+      cache-null-values: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      adjust-dates-to-context-time-zone: false
+    default-property-inclusion: non_null
+    mapper:
+      accept-case-insensitive-properties: true
+
+logging:
+  file.name: logs/log.log
+  level:
+    org.hibernate:
+      SQL: debug
+      type.descriptor.sql.BasicBinder: trace
+    org.springframework: warn
+    org.springframework.data.redis: DEBUG
+    redis.clients.jedis: DEBUG

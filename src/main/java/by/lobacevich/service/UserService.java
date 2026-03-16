@@ -2,28 +2,23 @@ package by.lobacevich.service;
 
 import by.lobacevich.dto.request.UserDtoRequest;
 import by.lobacevich.dto.response.UserDtoResponse;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import by.lobacevich.dto.response.UserWithCardsDto;
+import org.springframework.data.domain.Page;
 
 public interface UserService {
+
     UserDtoResponse create(UserDtoRequest dto);
 
-    @Transactional
     UserDtoResponse update(UserDtoRequest dto, Long id);
 
-    @Transactional
-    void delete(Long id);
+    UserWithCardsDto findById(Long id);
 
-    UserDtoResponse findById(Long id);
-
-    List<UserDtoResponse> findUsers(String firstname,
+    Page<UserDtoResponse> findUsers(String firstname,
                                     String surname,
-                                    int pageNumber,
-                                    int pageSize);
-    @Transactional
+                                    int number,
+                                    int size);
+
     void activate(Long id);
 
-    @Transactional
     void deactivate(Long id);
 }
