@@ -22,7 +22,7 @@ public abstract class AppEntity {
     protected LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     protected LocalDateTime updatedAt;
 
     @Column(nullable = false)

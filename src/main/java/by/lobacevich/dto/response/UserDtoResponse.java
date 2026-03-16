@@ -1,14 +1,11 @@
 package by.lobacevich.dto.response;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 public record UserDtoResponse(Long id,
                               String name,
                               String surname,
-                              LocalDate birthDate,
+                              String birthDate,
                               String email,
                               Boolean active,
-                              LocalDateTime createdAt,
-                              LocalDateTime updatedAt) {
+                              String createdAt,
+                              String updatedAt) {
 }

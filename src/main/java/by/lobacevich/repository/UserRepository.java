@@ -7,8 +7,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long>,
         JpaSpecificationExecutor<User> {
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.paymentCards WHERE u.id = :id")
+    Optional<User> findByIdWithCards(@Param("id") Long id);
 
     @Modifying
     @Query(value = "UPDATE users SET active = true WHERE id = :id",
