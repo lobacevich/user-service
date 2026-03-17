@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: user-service
+
   config:
     import: optional:file:.env[.properties]
 
@@ -31,15 +34,6 @@ spring:
       time-to-live: 600000
       cache-null-values: false
 
-#  jackson:
-#    serialization:
-#      write-dates-as-timestamps: false
-#    deserialization:
-#      adjust-dates-to-context-time-zone: false
-#    default-property-inclusion: non_null
-#    mapper:
-#      accept-case-insensitive-properties: true
-
 logging:
   file.name: logs/log.log
   level:
@@ -47,5 +41,4 @@ logging:
       SQL: debug
       type.descriptor.sql.BasicBinder: trace
     org.springframework: warn
-    org.springframework.data.redis: DEBUG
-    redis.clients.jedis: DEBUG
+    org.springframework.cache: trace
