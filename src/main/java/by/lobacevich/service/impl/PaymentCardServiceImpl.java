@@ -63,7 +63,7 @@ public class PaymentCardServiceImpl implements PaymentCardService {
         newCard.setId(oldCard.getId());
         newCard.setUser(oldCard.getUser());
         newCard.setCreatedAt(oldCard.getCreatedAt());
-        newCard.setActive(true);
+        newCard.setActive(oldCard.getActive());
         try {
             return mapper.entityToDto(repository.save(newCard));
         } catch (DataIntegrityViolationException e) {
