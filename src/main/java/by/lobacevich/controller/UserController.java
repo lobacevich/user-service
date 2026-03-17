@@ -54,7 +54,7 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/{id}/deactivate")
-    public void delete(@PathVariable Long id) {
+    public void deactivate(@PathVariable Long id) {
         service.deactivate(id);
     }
 

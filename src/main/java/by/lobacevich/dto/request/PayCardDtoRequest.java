@@ -2,7 +2,6 @@ package by.lobacevich.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -19,6 +18,5 @@ public record PayCardDtoRequest(@NotNull(message = "User id is required")
                                 String holder,
 
                                 @NotNull(message = "Expiration date is required")
-                                @Past(message = "Incorrect date")
                                 LocalDate expirationDate) {
 }
