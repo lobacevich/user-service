@@ -27,12 +27,13 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build & Test
-        run: ./gradlew clean build
+        run: ./gradlew clean build --debug
 
       - name: SonarQube analysis
-        run: ./gradlew sonar
+        run: ./gradlew sonar -Dsonar.gradle.skipCompile=true -Dsonar.organization=lobacevich -Dsonar.projectKey=lobacevich_userService -Dsonar.branch.name=main
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Log in Dockerhub
         uses: docker/login-action@v3
