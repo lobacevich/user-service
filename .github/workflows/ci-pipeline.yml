@@ -27,7 +27,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build & Test
-        run: ./gradlew clean build --debug
+        run: ./gradlew clean build --info
 
       - name: SonarQube analysis
         run: ./gradlew sonar -Dsonar.gradle.skipCompile=true -Dsonar.organization=lobacevich -Dsonar.projectKey=lobacevich_userService -Dsonar.branch.name=main
